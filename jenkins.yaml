@@ -1,0 +1,7 @@
+jenkins:
+  systemMessage: "Jenkins Configuration as code\n\n"
+tool:
+  git:
+    installations:
+    - home: "git"
+      name: "Default"
