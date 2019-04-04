@@ -5,3 +5,6 @@ tool:
     installations:
     - home: "git"
       name: "Default"
+security:
+    globalJobDslSecurityConfiguration:
+      useScriptSecurity: "true"
