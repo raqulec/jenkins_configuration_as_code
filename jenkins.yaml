@@ -1,10 +1,51 @@
 jenkins:
-  systemMessage: "Jenkins Configuration as code\n\n"
+  systemMessage: "Jenkins Configuration as code RAKU \n\n"
 tool:
   git:
     installations:
-    - home: "git"
-      name: "Default"
+      - home: "git"
+        name: "Default"
 security:
-    globalJobDslSecurityConfiguration:
-      useScriptSecurity: "true"
+  globalJobDslSecurityConfiguration:
+    useScriptSecurity: "false"
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              scope:    SYSTEM
+              id:       "6c445d57-6093-42c7-bd66-d4111e938172"
+              username: ${github_username}
+              password: ${github_pass}
+          - basicSSHUserPrivateKey:
+              scope:       SYSTEM
+              id:          "8b9ee92e-1e57-48c4-a8fd-18adddfdec3b"
+              description: "Heroku"
+              privateKeySource:
+                directEntry:
+                  privateKey: ${heroku_ssh}      
+jobs:
+  - script: >
+      job('seedJobTest') {
+        scm {
+          git {
+            remote {
+              name('github')
+              url('https://github.com/raqulec/dsl_scripts.git')
+              credentials('6c445d57-6093-42c7-bd66-d4111e938172')
+            }
+            branch('*/master')
+          }
+        }
+      }
+  - script: >
+      job('StartUpTrigger') {
+        triggers {
+          hudsonStartupTrigger{
+            label('master')
+            nodeParameterName('')
+            runOnChoice('')
+            quietPeriod('60')
+          }
+        }
+      }
