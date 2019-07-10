@@ -1,51 +1,58 @@
 jenkins:
-  systemMessage: "Jenkins Configuration as code RAKU \n\n"
-tool:
-  git:
-    installations:
-      - home: "git"
-        name: "Default"
 security:
   globalJobDslSecurityConfiguration:
     useScriptSecurity: "false"
+tool:
+  git:
+    installations:
+    - home: "git"
+      name: "Default"
 credentials:
   system:
     domainCredentials:
-      - credentials:
-          - usernamePassword:
-              scope:    SYSTEM
-              id:       "6c445d57-6093-42c7-bd66-d4111e938172"
-              username: ${github_username}
-              password: ${github_pass}
-          - basicSSHUserPrivateKey:
-              scope:       SYSTEM
-              id:          "8b9ee92e-1e57-48c4-a8fd-18adddfdec3b"
-              description: "Heroku"
-              privateKeySource:
-                directEntry:
-                  privateKey: ${heroku_ssh}      
+    - credentials:
+      - usernamePassword:
+          description: "GitHub"
+          id: "GITHUB"
+          password: ${GIT_PASSWORD}
+          scope: GLOBAL
+          username: ${GIT_USER}
+      - basicSSHUserPrivateKey:
+          description: "Heroku"
+          id: "HEROKU"
+          privateKeySource:
+            directEntry:
+              privateKey: ${HEROKU_SSH}
+          scope: GLOBAL
 jobs:
   - script: >
-      job('seedJobTest') {
-        scm {
-          git {
-            remote {
-              name('github')
-              url('https://github.com/raqulec/dsl_scripts.git')
-              credentials('6c445d57-6093-42c7-bd66-d4111e938172')
-            }
-            branch('*/master')
+      job('SeedJob') {
+          scm {
+              git {
+                  remote {
+                      name('Github')
+                      url('https://github.com/raqulec/dsl_scripts.git')
+                      credentials('GITHUB')
+                  }
+              }
           }
-        }
+          steps {
+              dsl {
+                  external('**/*.groovy')
+              }
+          }
+          triggers {
+              upstream('StartupTrigger', 'SUCCESS')
+          }
       }
   - script: >
-      job('StartUpTrigger') {
-        triggers {
-          hudsonStartupTrigger{
-            label('master')
-            nodeParameterName('')
-            runOnChoice('')
-            quietPeriod('60')
+      job('StartupTrigger') {
+          triggers {
+              hudsonStartupTrigger {
+                  label('')
+                  quietPeriod('')
+                  nodeParameterName('')
+                  runOnChoice('')
+              } 
           }
-        }
       }
